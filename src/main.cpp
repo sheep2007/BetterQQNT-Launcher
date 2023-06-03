@@ -32,7 +32,7 @@ int __stdcall wWinMain(
   Process32FirstW(hSnap, &pe);
   bool peFound = false;
   bool findProcess = false;
-  while (findProcess) {
+  while (!findProcess) {
     findProcess = Process32NextW(hSnap, &pe);
     if (wcscmp(pe.szExeFile, qqPath) == 0) {
       peFound = true;
