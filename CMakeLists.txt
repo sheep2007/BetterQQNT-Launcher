@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.0)
 ############################################################
 
 project(bqqenv
-    VERSION 0.1.0
+    VERSION 0.0.1
     DESCRIPTION "BetterQQNT Launcher"
     HOMEPAGE_URL "https://github.com/koishi-nt/BetterQQNT-Launcher"
     LANGUAGES C CXX
@@ -17,12 +17,48 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
 
 ############################################################
+# Download BetterQQNT
+############################################################
+
+set(
+    BETTERQQNT_VERSION
+    "0.1.0"
+    CACHE
+    STRING
+    "BetterQQNT Version"
+)
+
+set(
+    BETTERQQNT_URL
+    "https://github.com/koishi-nt/BetterQQNT/releases/download/${BETTERQQNT_VERSION}/better-qqnt-no-hijack.dll"
+)
+
+set(
+    BETTERQQNT_PATH
+    "${PROJECT_SOURCE_DIR}/build/better-qqnt-no-hijack.dll"
+)
+
+if (NOT EXISTS BETTERQQNT_PATH)
+    file(
+        MAKE_DIRECTORY
+        ${PROJECT_SOURCE_DIR}/build
+    )
+
+    file(
+        DOWNLOAD
+        ${BETTERQQNT_URL}
+        ${BETTERQQNT_PATH}
+    )
+endif()
+
+############################################################
 # App
 ############################################################
 
 add_executable(bqqenv
     WIN32
         src/main.cpp
+        src/bqqenv.rc
 )
 
 target_include_directories(bqqenv
