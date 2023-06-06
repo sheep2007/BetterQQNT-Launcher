@@ -33,7 +33,7 @@ std::unique_ptr<wchar_t[]> GetQQPath() {
       L"DisplayIcon",
       RRF_RT_REG_SZ,
       nullptr,
-      &qqPath,
+      qqPath.get(),
       &maxPath);
 
   if (openKeyErr) {
@@ -45,7 +45,7 @@ std::unique_ptr<wchar_t[]> GetQQPath() {
         L"DisplayIcon",
         RRF_RT_REG_SZ,
         nullptr,
-        &qqPath,
+        qqPath.get(),
         &maxPath);
   }
 
