@@ -64,7 +64,7 @@ int __stdcall wWinMain(
   const std::wstring bqqntPathStr =
       std::format(L"{}better-qqnt-{}.dll", tempPath, now);
   const wchar_t *bqqntPath = bqqntPathStr.c_str();
-  const unsigned long long bqqntPathSize =
+  const size_t bqqntPathSize =
       sizeof(wchar_t) * (bqqntPathStr.size() + 1);
 
   HANDLE bqqntFile =
@@ -122,6 +122,7 @@ int __stdcall wWinMain(
   if (!remoteThread) LogAndFailWithLastError(L"创建远程线程失败。");
 
   WaitForSingleObject(remoteThread, INFINITE);
+  CloseHandle(remoteThread);
 
   if (!VirtualFreeEx(pi.hProcess, remoteBqqntPath, 0, MEM_RELEASE))
     LogAndFailWithLastError(L"释放远程内存失败。");
