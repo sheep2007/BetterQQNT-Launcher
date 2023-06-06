@@ -1,30 +1,11 @@
-#include "bqqenv/main.hpp"
+#include "bqqenv/common.hpp"
 
 int __stdcall wWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
     _In_ PWSTR pCmdLine,
     _In_ int nCmdShow) {
-  unsigned long maxPath = MAX_PATH;
-
-  // 获取 QQ.exe 位置
-  wchar_t qqPath[MAX_PATH];
-  const long openKeyErr = RegGetValueW(
-      HKEY_LOCAL_MACHINE,
-      L"SOFTWARE\\WOW6432Node\\Microsoft\\Windows"
-      L"\\CurrentVersion\\Uninstall\\QQ",
-      L"DisplayIcon",
-      RRF_RT_REG_SZ,
-      nullptr,
-      &qqPath,
-      &maxPath);
-  if (openKeyErr) {
-    SetLastError(openKeyErr);
-    LogAndFailWithLastError(L"获取 QQ 位置时出现错误。QQ 可能未安装？");
-  }
-
-  // 去除 DisplayIcon 后的 ",0"
-  qqPath[wcslen(qqPath) - 2] = 0;
+  std::unique_ptr<wchar_t[]> qqPath = GetQQPath();
 
   PROCESSENTRY32W pe;
   pe.dwSize = sizeof(PROCESSENTRY32W);
@@ -34,7 +15,7 @@ int __stdcall wWinMain(
   bool findProcess = false;
   while (!findProcess) {
     findProcess = Process32NextW(hSnap, &pe);
-    if (wcscmp(pe.szExeFile, qqPath) == 0) {
+    if (wcscmp(pe.szExeFile, qqPath.get()) == 0) {
       peFound = true;
       findProcess = false;
     }
@@ -64,11 +45,10 @@ int __stdcall wWinMain(
   const std::wstring bqqntPathStr =
       std::format(L"{}better-qqnt-{}.dll", tempPath, now);
   const wchar_t *bqqntPath = bqqntPathStr.c_str();
-  const size_t bqqntPathSize =
-      sizeof(wchar_t) * (bqqntPathStr.size() + 1);
+  const size_t bqqntPathSize = sizeof(wchar_t) * (bqqntPathStr.size() + 1);
 
   HANDLE bqqntFile =
-      CreateFileW(bqqntPath, GENERIC_WRITE, 0, nullptr, CREATE_NEW, 0, 0);
+      CreateFileW(bqqntPath, GENERIC_WRITE, 0, nullptr, CREATE_NEW, 0, nullptr);
   if (bqqntFile == INVALID_HANDLE_VALUE)
     LogAndFailWithLastError(L"创建临时文件失败。");
   unsigned long sizeWritten;
@@ -77,7 +57,7 @@ int __stdcall wWinMain(
   if (!CloseHandle(bqqntFile)) LogAndFailWithLastError(L"关闭临时文件失败。");
 
   // 准备 QQ 启动命令行
-  std::wstring cmdLineStr = std::format(L"\"{}\"", qqPath);
+  std::wstring cmdLineStr = std::format(L"\"{}\"", qqPath.get());
   // 检测是否为 WINE
   if (GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "wine_get_version")) {
     // 环境为 WINE，禁用 GPU 渲染
@@ -132,26 +112,4 @@ int __stdcall wWinMain(
   DeleteFileW(bqqntPath);
 
   return 0;
-}
-
-void LogAndFail(const wchar_t *message) {
-  MessageBoxW(nullptr, message, L"BetterQQNT-Launcher 错误", MB_ICONERROR);
-  ExitProcess(1);
-}
-
-void LogAndFailWithLastError(const wchar_t *message) {
-  wchar_t *winErrMessage;
-  const unsigned long err = GetLastError();
-  FormatMessageW(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-          FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr,
-      err,
-      0,
-      reinterpret_cast<wchar_t *>(&winErrMessage),
-      0,
-      nullptr);
-  LogAndFail(
-      std::format(L"{}错误代码：{} 详细信息：{}", message, err, winErrMessage)
-          .c_str());
 }

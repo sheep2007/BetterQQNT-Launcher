@@ -97,8 +97,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # IDEs
-.idea/
 .vscode/
 
 # Build files
 build/
+dist/

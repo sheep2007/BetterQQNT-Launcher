@@ -5,9 +5,8 @@ cmake_minimum_required(VERSION 3.0)
 ############################################################
 
 project(bqqenv
-    VERSION 0.0.1
     DESCRIPTION "BetterQQNT Launcher"
-    HOMEPAGE_URL "https://github.com/koishi-nt/BetterQQNT-Launcher"
+    HOMEPAGE_URL "https://github.com/BetterQQNT/BetterQQNT-Launcher"
     LANGUAGES C CXX
 )
 
@@ -22,15 +21,35 @@ set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
 
 set(
     BETTERQQNT_VERSION
-    "0.1.0"
+    "0.0.0"
     CACHE
     STRING
     "BetterQQNT Version"
 )
 
 set(
+    BETTERQQNT_ARCH
+    "x86"
+    CACHE
+    STRING
+    "BetterQQNT Architecture"
+)
+
+if (BETTERQQNT_ARCH MATCHES "x64")
+    set(
+        BETTERQQNT_FILENAME
+        "better-qqnt-no-hijack-x64.dll"
+    )
+else()
+    set(
+        BETTERQQNT_FILENAME
+        "better-qqnt-no-hijack.dll"
+    )
+endif()
+
+set(
     BETTERQQNT_URL
-    "https://github.com/koishi-nt/BetterQQNT/releases/download/${BETTERQQNT_VERSION}/better-qqnt-no-hijack.dll"
+    "https://github.com/BetterQQNT/BetterQQNT/releases/download/${BETTERQQNT_VERSION}/${BETTERQQNT_FILENAME}"
 )
 
 set(
@@ -40,14 +59,10 @@ set(
 
 if (NOT EXISTS BETTERQQNT_PATH)
     file(
-        MAKE_DIRECTORY
-        ${PROJECT_SOURCE_DIR}/build
-    )
-
-    file(
         DOWNLOAD
-        ${BETTERQQNT_URL}
-        ${BETTERQQNT_PATH}
+            ${BETTERQQNT_URL}
+            ${BETTERQQNT_PATH}
+            SHOW_PROGRESS
     )
 endif()
 
@@ -55,10 +70,23 @@ endif()
 # App
 ############################################################
 
+add_executable(bqqinj
+    WIN32
+        src/common.cpp
+        src/inj.cpp
+        src/inj.rc
+)
+
+target_include_directories(bqqinj
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+)
+
 add_executable(bqqenv
     WIN32
-        src/main.cpp
-        src/bqqenv.rc
+        src/common.cpp
+        src/env.cpp
+        src/env.rc
 )
 
 target_include_directories(bqqenv
@@ -70,6 +98,16 @@ target_include_directories(bqqenv
 # Compile Flags
 ############################################################
 
+target_compile_definitions(bqqinj
+    PRIVATE
+        UNICODE
+        _UNICODE
+        WIN32
+        _WIN32
+        WINDOWS
+        _WINDOWS
+)
+
 target_compile_definitions(bqqenv
     PRIVATE
         UNICODE
@@ -80,31 +118,24 @@ target_compile_definitions(bqqenv
         _WINDOWS
 )
 
-if (MSVC)
-    target_compile_options(bqqenv
-        PRIVATE
-            /utf-8
-    )
-else()
-    target_compile_options(bqqenv
-        PRIVATE
-            -fexec-charset=UTF-8
-            -finput-charset=UTF-8
-    )
-endif()
+target_compile_options(bqqinj
+    PRIVATE
+        /ZI
+        /utf-8
+)
 
-############################################################
-# Support Visual Studio "Edit and Continue"
-############################################################
+target_compile_options(bqqenv
+    PRIVATE
+        /ZI
+        /utf-8
+)
 
-if (CMAKE_GENERATOR MATCHES "Visual Studio")
-    target_compile_options(bqqenv
-        PRIVATE
-            /ZI
-    )
+target_link_options(bqqinj
+    PRIVATE
+        /INCREMENTAL
+)
 
-    target_link_options(bqqenv
-        PRIVATE
-            /INCREMENTAL
-    )
-endif()
+target_link_options(bqqenv
+    PRIVATE
+        /INCREMENTAL
+)

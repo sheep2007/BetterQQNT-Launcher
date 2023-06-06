@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSharedSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug x86" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio x86" GENERATION_OPTIONS="-DBETTERQQNT_ARCH=x86" />
+      <configuration PROFILE_NAME="Debug x64" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio x64" GENERATION_OPTIONS="-DBETTERQQNT_ARCH=x64" />
+      <configuration PROFILE_NAME="Release x86" ENABLED="true" CONFIG_NAME="MinSizeRel" TOOLCHAIN_NAME="Visual Studio x86" GENERATION_OPTIONS="-DBETTERQQNT_ARCH=x86" />
+      <configuration PROFILE_NAME="Release x64" ENABLED="true" CONFIG_NAME="MinSizeRel" TOOLCHAIN_NAME="Visual Studio x64" GENERATION_OPTIONS="-DBETTERQQNT_ARCH=x64" />
+    </configurations>
+  </component>
+</project>
