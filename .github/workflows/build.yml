@@ -24,8 +24,6 @@ jobs:
       - name: Build
         run: ./build.sh
         shell: bash
-        env:
-          BETTERQQNT_VERSION: 0.1.5
 
       - uses: actions/upload-artifact@v3
         with:
